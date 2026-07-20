@@ -304,6 +304,52 @@ export const obtenerMisSolicitudes = async (req, res) => {
     }
 };
 
+export const obtenerMiembrosGrupo = async (req, res) => {
+    try {
+        const { grupoId } = req.params;
+        const [rows] = await conmysql.query(`
+            SELECT u.id, u.nombre, u.avatar_url
+            FROM grupo_miembros gm
+            JOIN usuarios u ON gm.usuario_id = u.id
+            WHERE gm.grupo_id = ?
+        `, [grupoId]);
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener miembros" });
+    }
+};
+
+export const obtenerCalificacionesGrupo = async (req, res) => {
+    try {
+        const { grupoId } = req.params;
+        const [rows] = await conmysql.query(`
+            SELECT contenido_id, usuario_id, calificacion
+            FROM grupo_calificaciones
+            WHERE grupo_id = ?
+        `, [grupoId]);
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener calificaciones" });
+    }
+};
+
+export const calificarContenidoGrupo = async (req, res) => {
+    try {
+        const { grupoId, contenidoId, calificacion } = req.body;
+        const usuarioId = obtenerUsuarioId(req);
+
+        await conmysql.query(`
+            INSERT INTO grupo_calificaciones (grupo_id, contenido_id, usuario_id, calificacion)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE calificacion = VALUES(calificacion)
+        `, [grupoId, contenidoId, usuarioId, calificacion]);
+
+        res.json({ message: "Calificación guardada" });
+    } catch (error) {
+        res.status(500).json({ message: "Error al calificar" });
+    }
+};
+
 export const abandonarGrupo = async (req, res) => {
     try {
         const usuarioId = obtenerUsuarioId(req);

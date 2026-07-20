@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { verificarToken } from '../middlewares/auth.middleware.js';
-import { obtenerMisSolicitudes, aceptarSolicitud, enviarSolicitud, crearGrupo, obtenerMisGrupos, invitarMiembro, obtenerContenidosGrupo, agregarContenidoGrupo, actualizarProgresoGrupo, actualizarGrupo, obtenerMensajesGrupo, enviarMensajeGrupo, rechazarSolicitud, abandonarGrupo, } from '../controladores/grupoctrl.js';
+import { obtenerMisSolicitudes, aceptarSolicitud, enviarSolicitud, crearGrupo, obtenerMisGrupos, invitarMiembro, obtenerContenidosGrupo, agregarContenidoGrupo, actualizarProgresoGrupo, actualizarGrupo, obtenerMensajesGrupo, enviarMensajeGrupo, rechazarSolicitud, abandonarGrupo, obtenerMiembrosGrupo, obtenerCalificacionesGrupo, calificarContenidoGrupo} from '../controladores/grupoctrl.js';
 
 const router = Router();
 
@@ -18,5 +18,8 @@ router.post('/grupos/solicitud/aceptar/:solicitudId', verificarToken, aceptarSol
 router.get('/grupos/solicitudes', verificarToken, obtenerMisSolicitudes);
 router.delete('/grupos/:grupoId/salir', verificarToken, abandonarGrupo);
 router.delete('/grupos/solicitud/:solicitudId', verificarToken, rechazarSolicitud);
+router.get('/grupos/:grupoId/miembros', verificarToken, obtenerMiembrosGrupo);
+router.get('/grupos/:grupoId/calificaciones', verificarToken, obtenerCalificacionesGrupo);
+router.post('/grupos/calificar', verificarToken, calificarContenidoGrupo);
 
 export default router;
