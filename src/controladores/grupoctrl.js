@@ -346,6 +346,7 @@ export const calificarContenidoGrupo = async (req, res) => {
 
         res.json({ message: "Calificación guardada" });
     } catch (error) {
+        console.error("Error salvaje en MySQL al calificar:", error);
         res.status(500).json({ message: "Error al calificar" });
     }
 };
