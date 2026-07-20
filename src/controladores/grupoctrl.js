@@ -259,11 +259,28 @@ export const aceptarSolicitud = async (req, res) => {
         
         if (solicitud.length === 0) return res.status(404).json({ message: "Solicitud no encontrada" });
 
+        const grupoId = solicitud[0].grupo_id;
+
+        await conmysql.query('INSERT INTO grupo_miembros (grupo_id, usuario_id) VALUES (?, ?)', [grupoId, usuarioId]);
+
         await conmysql.query('DELETE FROM grupo_solicitudes WHERE id = ?', [solicitudId]);
 
         res.json({ message: "¡Ahora eres miembro del grupo!" });
     } catch (error) {
         res.status(500).json({ message: "Error al aceptar solicitud" });
+    }
+};
+
+export const rechazarSolicitud = async (req, res) => {
+    try {
+        const { solicitudId } = req.params;
+        const usuarioId = obtenerUsuarioId(req);
+
+        await conmysql.query('DELETE FROM grupo_solicitudes WHERE id = ? AND usuario_id_receptor = ?', [solicitudId, usuarioId]);
+
+        res.json({ message: "Solicitud rechazada" });
+    } catch (error) {
+        res.status(500).json({ message: "Error al rechazar solicitud" });
     }
 };
 
