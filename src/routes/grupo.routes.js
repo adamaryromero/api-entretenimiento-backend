@@ -14,6 +14,7 @@ router.put('/grupos', verificarToken, actualizarGrupo);
 router.get('/grupos/:grupoId/chat', verificarToken, obtenerMensajesGrupo);
 router.post('/grupos/chat', verificarToken, enviarMensajeGrupo);
 router.post('/grupos/solicitud', verificarToken, enviarSolicitud);
+router.post('/solicitud/aceptar/:solicitudId', aceptarSolicitud);
 router.put('/grupos/solicitud/:solicitudId/aceptar', verificarToken, aceptarSolicitud);
 router.get('/grupos/solicitudes', verificarToken, obtenerMisSolicitudes);
 router.delete('/grupos/:grupoId/salir', verificarToken, abandonarGrupo);
