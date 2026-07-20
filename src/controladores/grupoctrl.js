@@ -93,7 +93,9 @@ export const invitarMiembro = async (req, res) => {
 
 export const obtenerContenidosGrupo = async (req, res) => {
     try {
+        const usuarioId = obtenerUsuarioId(req);
         const { grupoId } = req.params;
+        
         const [rows] = await conmysql.query(`
             SELECT gc.id, gc.progreso_actual, gc.estado_id, e.nombre AS estado_nombre,
                    gc.fecha_inicio, gc.fecha_fin, gc.comentarios, 
@@ -101,13 +103,17 @@ export const obtenerContenidosGrupo = async (req, res) => {
                    (SELECT GROUP_CONCAT(g.nombre SEPARATOR ', ') 
                     FROM contenido_generos cg 
                     INNER JOIN generos g ON cg.genero_id = g.id 
-                    WHERE cg.contenido_id = c.id) AS generos
+                    WHERE cg.contenido_id = c.id) AS generos,
+                   IFNULL((SELECT calificacion 
+                           FROM grupo_calificaciones 
+                           WHERE grupo_id = gc.grupo_id AND contenido_id = gc.contenido_id AND usuario_id = ? LIMIT 1), 0) AS calificacion_personal
             FROM grupo_contenidos gc
             JOIN contenidos c ON gc.contenido_id = c.id
             JOIN categorias cat ON c.categoria_id = cat.id
             JOIN estados e ON gc.estado_id = e.id
             WHERE gc.grupo_id = ?
-        `, [grupoId]);
+        `, [usuarioId, grupoId]);
+        
         res.json(rows);
     } catch (error) {
         console.error(error);
