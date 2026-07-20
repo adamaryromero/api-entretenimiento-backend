@@ -1,7 +1,7 @@
 import { conmysql } from '../db.js';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_firma_secreta';
+const JWT_SECRET = process.env.JWT_SECRET || 'projectEntretenimiento';
 
 const obtenerUsuarioId = (req) => {
     const token = req.headers['authorization']?.split(' ')[1];
@@ -10,7 +10,6 @@ const obtenerUsuarioId = (req) => {
     return decodificado.id;
 };
 
-// 1. Seguir a un usuario
 export const seguirUsuario = async (req, res) => {
     try {
         const seguidorId = obtenerUsuarioId(req);
@@ -26,7 +25,6 @@ export const seguirUsuario = async (req, res) => {
     }
 };
 
-// 2. Dejar de seguir
 export const dejarDeSeguir = async (req, res) => {
     try {
         const seguidorId = obtenerUsuarioId(req);
@@ -39,7 +37,6 @@ export const dejarDeSeguir = async (req, res) => {
     }
 };
 
-// 3. Obtener lista de seguidos
 export const obtenerSeguidos = async (req, res) => {
     try {
         const usuarioId = obtenerUsuarioId(req);

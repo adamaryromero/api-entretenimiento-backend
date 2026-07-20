@@ -1,7 +1,7 @@
 import { conmysql } from '../db.js';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_firma_secreta';
+const JWT_SECRET = process.env.JWT_SECRET || 'projectEntretenimiento';
 
 const obtenerUsuarioId = (req) => {
     const token = req.headers['authorization']?.split(' ')[1];
@@ -10,13 +10,11 @@ const obtenerUsuarioId = (req) => {
     return decodificado.id;
 };
 
-// 1. Verificar si son amigos (match mutuo)
 export const verificarMatch = async (req, res) => {
     try {
         const miId = obtenerUsuarioId(req);
         const { otroId } = req.params;
-        
-        // Verifica si A sigue a B y B sigue a A
+
         const [rows] = await conmysql.query(`
             SELECT 
                 (SELECT COUNT(*) FROM seguidores WHERE seguidor_id = ? AND seguido_id = ?) as sigoA,
@@ -26,11 +24,10 @@ export const verificarMatch = async (req, res) => {
         const esMatch = rows[0].sigoA > 0 && rows[0].meSigueA > 0;
         res.json({ esMatch });
     } catch (error) {
-        res.status(500).json({ message: "Error al verificar match" });
+        res.status(500).json({ message: "Error al verificar" });
     }
 };
 
-// 2. Enviar mensaje privado
 export const enviarMensajePrivado = async (req, res) => {
     try {
         const remitente_id = obtenerUsuarioId(req);
@@ -46,7 +43,6 @@ export const enviarMensajePrivado = async (req, res) => {
     }
 };
 
-// 3. Obtener conversación
 export const obtenerConversacion = async (req, res) => {
     try {
         const miId = obtenerUsuarioId(req);
@@ -67,13 +63,10 @@ export const obtenerConversacion = async (req, res) => {
     }
 };
 
-// Obtener lista de chats (contactos con los que se ha hablado)
 export const obtenerMisChats = async (req, res) => {
     try {
         const miId = obtenerUsuarioId(req);
         
-        // Esta query busca los IDs de los usuarios con los que has tenido mensajes
-        // Luego hace un JOIN con 'usuarios' para traer sus nombres y avatares
         const [chats] = await conmysql.query(`
             SELECT DISTINCT u.id, u.nombre, u.avatar_url,
             (SELECT mensaje FROM mensajes_privados 

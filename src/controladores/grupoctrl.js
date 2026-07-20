@@ -1,7 +1,7 @@
 import { conmysql } from '../db.js'; 
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_firma_secreta';
+const JWT_SECRET = process.env.JWT_SECRET || 'projectEntretenimiento';
 
 const obtenerUsuarioId = (req) => {
     const token = req.headers['authorization']?.split(' ')[1];
@@ -284,17 +284,14 @@ export const abandonarGrupo = async (req, res) => {
         const usuarioId = obtenerUsuarioId(req);
         const { grupoId } = req.params;
 
-        // Verificar si es el creador
         const [grupo] = await conmysql.query('SELECT creador_id FROM grupos WHERE id = ?', [grupoId]);
         
         if (grupo.length === 0) return res.status(404).json({ message: "Grupo no encontrado" });
 
         if (grupo[0].creador_id === usuarioId) {
-            // Si es el creador, eliminamos el grupo (esto borra los miembros por el ON DELETE CASCADE)
             await conmysql.query('DELETE FROM grupos WHERE id = ?', [grupoId]);
             res.json({ message: "Grupo eliminado permanentemente (eras el creador)." });
         } else {
-            // Si es miembro normal, solo borramos su registro
             await conmysql.query('DELETE FROM grupo_miembros WHERE grupo_id = ? AND usuario_id = ?', [grupoId, usuarioId]);
             res.json({ message: "Has abandonado el grupo." });
         }

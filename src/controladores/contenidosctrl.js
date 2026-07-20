@@ -20,7 +20,6 @@ export const getContenidos = async (req, res) => {
     }
 };
 
-// === 1. MODIFICAR GET POR ID PARA QUE DEVUELVA LAS TEMPORADAS ===
 export const getContenidoById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -36,13 +35,12 @@ export const getContenidoById = async (req, res) => {
 
         const contenido = rows[0];
 
-        // Si es Serie (2) o Anime (3), buscamos sus temporadas
         if (contenido.categoria_id === 2 || contenido.categoria_id === 3) {
             const [temporadas] = await conmysql.query(
                 'SELECT numero_temporada, cantidad_capitulos FROM contenido_temporadas WHERE contenido_id = ? ORDER BY numero_temporada ASC',
                 [id]
             );
-            contenido.temporadas = temporadas; // Adjuntamos el arreglo al JSON de respuesta
+            contenido.temporadas = temporadas; 
         }
 
         res.json(contenido);
@@ -52,7 +50,6 @@ export const getContenidoById = async (req, res) => {
     }
 };
 
-// === 2. MODIFICAR ACTUALIZAR PARA QUE SOBREESCRIBA LAS TEMPORADAS ===
 export const actualizarContenido = async (req, res) => {
     try {
         const { id } = req.params;

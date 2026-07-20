@@ -80,10 +80,7 @@ export const deleteUsuario = async (req, res) => {
     }
 };
 
-// ==========================================
-// NUEVAS FUNCIONES: INTERACCIÓN SOCIAL
-// ==========================================
-
+//interacción social
 export const buscarUsuarios = async (req, res) => {
     try {
         const { q } = req.query;
@@ -104,7 +101,7 @@ export const buscarUsuarios = async (req, res) => {
     }
 };
 
-// Obtener comentarios del muro de un perfil (Foro)
+//obtener comentarios del muro de un perfil
 export const getComentariosPerfil = async (req, res) => {
     try {
         const { id } = req.params; // ID del perfil que estamos visitando

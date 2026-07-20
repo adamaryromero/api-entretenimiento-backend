@@ -7,9 +7,12 @@ import seguimientosRoutes from './routes/seguimientos.routes.js';
 import grupoRoutes from './routes/grupo.routes.js';
 import seguidoresRoutes from './routes/seguidores.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+
 const app=express();
+
 app.use(cors());
 app.use(express.json()); //para que interprete los objetos json
+
 //rutas
 app.use('/api', authRoutes);
 app.use('/api', usuariosRoutes);
