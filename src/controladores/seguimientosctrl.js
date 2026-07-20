@@ -1,5 +1,4 @@
 import { conmysql } from '../db.js';
-import { obtenerUsuarioId } from '../controladores/seguidoresctrl.js';
 
 export const getMisSeguimientos = async (req, res) => {
     try {
