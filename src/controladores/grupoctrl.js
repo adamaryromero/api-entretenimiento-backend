@@ -97,7 +97,11 @@ export const obtenerContenidosGrupo = async (req, res) => {
         const [rows] = await conmysql.query(`
             SELECT gc.id, gc.progreso_actual, gc.estado_id, e.nombre AS estado_nombre,
                    gc.fecha_inicio, gc.fecha_fin, gc.comentarios, 
-                   c.id AS contenido_id, c.titulo, c.portada_url, c.total_unidades, cat.nombre AS categoria
+                   c.id AS contenido_id, c.titulo, c.portada_url, c.total_unidades, cat.nombre AS categoria,
+                   (SELECT GROUP_CONCAT(g.nombre SEPARATOR ', ') 
+                    FROM contenido_generos cg 
+                    INNER JOIN generos g ON cg.genero_id = g.id 
+                    WHERE cg.contenido_id = c.id) AS generos
             FROM grupo_contenidos gc
             JOIN contenidos c ON gc.contenido_id = c.id
             JOIN categorias cat ON c.categoria_id = cat.id

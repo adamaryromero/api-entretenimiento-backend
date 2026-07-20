@@ -1,4 +1,5 @@
 import { conmysql } from '../db.js';
+import { obtenerUsuarioId } from '../controladores/seguidoresctrl.js';
 
 export const getMisSeguimientos = async (req, res) => {
     try {
@@ -9,7 +10,13 @@ export const getMisSeguimientos = async (req, res) => {
                    s.fecha_inicio, s.fecha_fin, 
                    s.minuto_favorito, s.fecha_visto, s.temporada_actual, s.capitulo_actual, s.formato_lectura,
                    c.titulo, c.portada_url, c.total_unidades, c.duracion_promedio_minutos,
-                   e.nombre AS estado_actual, e.id AS estado_id, cat.nombre AS categoria, cat.id AS categoria_id
+                   e.nombre AS estado_actual, 
+                   e.nombre AS estado_nombre,
+                   e.id AS estado_id, cat.nombre AS categoria, cat.id AS categoria_id,
+                   (SELECT GROUP_CONCAT(g.nombre SEPARATOR ', ') 
+                    FROM contenido_generos cg 
+                    INNER JOIN generos g ON cg.genero_id = g.id 
+                    WHERE cg.contenido_id = c.id) AS generos
             FROM seguimientos s
             INNER JOIN contenidos c ON s.contenido_id = c.id
             INNER JOIN estados e ON s.estado_id = e.id

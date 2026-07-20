@@ -12,29 +12,23 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "Por favor, envía correo y contraseña" });
         }
 
-        // 1. Buscamos al usuario SOLO por el correo (ya no buscamos por password)
         const [result] = await conmysql.query(
             'SELECT * FROM usuarios WHERE correo = ?', 
             [correo]
         );
 
-        // Si no existe el correo, detenemos el proceso
         if (result.length === 0) {
             return res.status(401).json({ message: "Credenciales incorrectas" });
         }
 
         const usuario = result[0];
 
-        // 2. Usamos bcrypt para comparar la contraseña plana que llega del frontend 
-        // con el hash guardado en la base de datos
         const passwordCorrecta = await bcrypt.compare(password, usuario.password);
 
-        // Si las contraseñas no coinciden, detenemos el proceso
         if (!passwordCorrecta) {
             return res.status(401).json({ message: "Credenciales incorrectas" });
         }
 
-        // 3. Si todo está correcto, generamos el Token (Pulsera VIP) como lo tenías antes
         const token = jwt.sign(
             { 
                 id: usuario.id, 
@@ -88,10 +82,8 @@ export const registrarUsuario = async (req, res) => {
 
         const avatar_url = `https://api.dicebear.com/7.x/bottts/svg?seed=${nombre.replace(/\s+/g, '')}`;
 
-        // <-- 2. Generas el Hash seguro (10 rondas es el estándar de la industria)
         const passwordHasheada = await bcrypt.hash(password, 10);
 
-        // <-- 3. Guardas 'passwordHasheada' en lugar del 'password' original
         const [result] = await conmysql.query(
             'INSERT INTO usuarios (nombre, correo, password, avatar_url) VALUES (?, ?, ?, ?)',
             [nombre, correo, passwordHasheada, avatar_url]
