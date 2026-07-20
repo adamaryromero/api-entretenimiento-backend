@@ -79,7 +79,6 @@ export const invitarMiembro = async (req, res) => {
             return res.status(400).json({ message: "Este usuario ya pertenece al grupo" });
         }
 
-        // Agregar al grupo
         await conmysql.query(
             'INSERT INTO grupo_miembros (grupo_id, usuario_id) VALUES (?, ?)',
             [grupoId, usuarioId]
@@ -221,15 +220,14 @@ export const enviarMensajeGrupo = async (req, res) => {
 
 export const enviarSolicitud = async (req, res) => {
     try {
-        const { grupoId, correo } = req.body;
+        const { grupoId, correo: receptorId } = req.body; 
         const emisorId = obtenerUsuarioId(req);
 
-        const [user] = await conmysql.query('SELECT id FROM usuarios WHERE correo = ?', [correo]);
-        if (user.length === 0) return res.status(404).json({ message: "Usuario no encontrado" });
-        const receptorId = user[0].id;
-
         const [existe] = await conmysql.query('SELECT * FROM grupo_miembros WHERE grupo_id = ? AND usuario_id = ?', [grupoId, receptorId]);
-        if (existe.length > 0) return res.status(400).json({ message: "Ya es miembro" });
+        if (existe.length > 0) return res.status(400).json({ message: "Este amigo ya pertenece a la sala" });
+
+        const [solicitudPrevia] = await conmysql.query('SELECT * FROM grupo_solicitudes WHERE grupo_id = ? AND usuario_id_receptor = ? AND estado = "pendiente"', [grupoId, receptorId]);
+        if (solicitudPrevia.length > 0) return res.status(400).json({ message: "Ya le enviaste una solicitud que está pendiente" });
 
         await conmysql.query(
             'INSERT INTO grupo_solicitudes (grupo_id, usuario_id_receptor, estado) VALUES (?, ?, "pendiente")',
@@ -238,6 +236,7 @@ export const enviarSolicitud = async (req, res) => {
 
         res.json({ message: "Solicitud enviada. Pendiente de aceptación." });
     } catch (error) {
+        console.error("Error al enviar solicitud:", error);
         res.status(500).json({ message: "Error al enviar solicitud" });
     }
 };
