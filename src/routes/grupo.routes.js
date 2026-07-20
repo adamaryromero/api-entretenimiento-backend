@@ -17,6 +17,6 @@ router.post('/grupos/solicitud', verificarToken, enviarSolicitud);
 router.post('/grupos/solicitud/aceptar/:solicitudId', verificarToken, aceptarSolicitud);
 router.get('/grupos/solicitudes', verificarToken, obtenerMisSolicitudes);
 router.delete('/grupos/:grupoId/salir', verificarToken, abandonarGrupo);
-rrouter.delete('/grupos/solicitud/:solicitudId', verificarToken, rechazarSolicitud);
+router.delete('/grupos/solicitud/:solicitudId', verificarToken, rechazarSolicitud);
 
 export default router;
