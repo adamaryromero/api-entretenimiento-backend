@@ -221,7 +221,6 @@ export const enviarMensajeGrupo = async (req, res) => {
 export const enviarSolicitud = async (req, res) => {
     try {
         const grupoId = req.body.grupoId;
-       
         const receptorId = req.body.correo || req.body.usuarioId || req.body.receptorId; 
         
         const emisorId = obtenerUsuarioId(req);
@@ -233,12 +232,15 @@ export const enviarSolicitud = async (req, res) => {
         const [existe] = await conmysql.query('SELECT * FROM grupo_miembros WHERE grupo_id = ? AND usuario_id = ?', [grupoId, receptorId]);
         if (existe.length > 0) return res.status(400).json({ message: "Este amigo ya pertenece a la sala" });
 
-        const [solicitudPrevia] = await conmysql.query('SELECT * FROM grupo_solicitudes WHERE grupo_id = ? AND usuario_id_receptor = ? AND estado = "pendiente"', [grupoId, receptorId]);
+        const [solicitudPrevia] = await conmysql.query(
+            'SELECT * FROM grupo_solicitudes WHERE grupo_id = ? AND usuario_id_receptor = ? AND estado = ?', 
+            [grupoId, receptorId, 'pendiente']
+        );
         if (solicitudPrevia.length > 0) return res.status(400).json({ message: "Ya le enviaste una solicitud que está pendiente" });
 
         await conmysql.query(
-            'INSERT INTO grupo_solicitudes (grupo_id, usuario_id_receptor, estado) VALUES (?, ?, "pendiente")',
-            [grupoId, receptorId]
+            'INSERT INTO grupo_solicitudes (grupo_id, usuario_id_receptor, estado) VALUES (?, ?, ?)',
+            [grupoId, receptorId, 'pendiente']
         );
 
         res.json({ message: "Solicitud enviada. Pendiente de aceptación." });
