@@ -46,20 +46,37 @@ export const addSeguimiento = async (req, res) => {
 export const updateProgreso = async (req, res) => {
     try {
         const { id } = req.params; 
-        const { progreso_actual, temporada_actual, capitulo_actual, estado_id, calificacion_personal, notas_personales, oculto_perfil } = req.body;
+        const { 
+            progreso_actual, temporada_actual, capitulo_actual, estado_id, 
+            calificacion_personal, notas_personales, oculto_perfil,
+            fecha_inicio, fecha_fin, fecha_visto, formato_lectura, minuto_favorito 
+        } = req.body;
 
         let query = 'UPDATE seguimientos SET ';
         const values = [];
-        
-        if (progreso_actual !== undefined) { query += 'progreso_actual = ?, '; values.push(progreso_actual); }
-        if (temporada_actual !== undefined) { query += 'temporada_actual = ?, '; values.push(temporada_actual); }
-        if (capitulo_actual !== undefined) { query += 'capitulo_actual = ?, '; values.push(capitulo_actual); }
-        if (estado_id !== undefined) { query += 'estado_id = ?, '; values.push(estado_id); }
-        if (calificacion_personal !== undefined) { query += 'calificacion_personal = ?, '; values.push(calificacion_personal); }
-        if (notas_personales !== undefined) { query += 'notas_personales = ?, '; values.push(notas_personales); }
-        if (oculto_perfil !== undefined) { query += 'oculto_perfil = ?, '; values.push(oculto_perfil); }
+        const addField = (field, value) => {
+            if (value !== undefined) {
+                query += `${field} = ?, `;
+                values.push(value);
+            }
+        };
 
-        query += 'fecha_actualizacion = CURRENT_TIMESTAMP WHERE id = ?';
+        addField('progreso_actual', progreso_actual);
+        addField('temporada_actual', temporada_actual);
+        addField('capitulo_actual', capitulo_actual);
+        addField('estado_id', estado_id);
+        addField('calificacion_personal', calificacion_personal);
+        addField('notas_personales', notas_personales);
+        addField('oculto_perfil', oculto_perfil);
+        addField('fecha_inicio', fecha_inicio);
+        addField('fecha_fin', fecha_fin);
+        addField('fecha_visto', fecha_visto);
+        addField('formato_lectura', formato_lectura);
+        addField('minuto_favorito', minuto_favorito);
+
+        query = query.slice(0, -2);
+
+        query += ' WHERE id = ?';
         values.push(id);
 
         await conmysql.query(query, values);
