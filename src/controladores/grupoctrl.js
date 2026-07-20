@@ -220,8 +220,15 @@ export const enviarMensajeGrupo = async (req, res) => {
 
 export const enviarSolicitud = async (req, res) => {
     try {
-        const { grupoId, correo: receptorId } = req.body; 
+        const grupoId = req.body.grupoId;
+       
+        const receptorId = req.body.correo || req.body.usuarioId || req.body.receptorId; 
+        
         const emisorId = obtenerUsuarioId(req);
+
+        if (!receptorId) {
+             return res.status(400).json({ message: "No se recibió el ID del usuario a invitar" });
+        }
 
         const [existe] = await conmysql.query('SELECT * FROM grupo_miembros WHERE grupo_id = ? AND usuario_id = ?', [grupoId, receptorId]);
         if (existe.length > 0) return res.status(400).json({ message: "Este amigo ya pertenece a la sala" });
@@ -237,7 +244,7 @@ export const enviarSolicitud = async (req, res) => {
         res.json({ message: "Solicitud enviada. Pendiente de aceptación." });
     } catch (error) {
         console.error("Error al enviar solicitud:", error);
-        res.status(500).json({ message: "Error al enviar solicitud" });
+        res.status(500).json({ message: "Error interno en el servidor" });
     }
 };
 
