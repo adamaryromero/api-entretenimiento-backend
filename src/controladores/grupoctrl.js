@@ -1,6 +1,6 @@
 import { conmysql } from '../db.js'; 
 import jwt from 'jsonwebtoken';
-import { enviarPushAUser } from './controladores/notisctrl.js'; 
+import { enviarPushAUser } from './notisctrl.js'; 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'projectEntretenimiento';
 
