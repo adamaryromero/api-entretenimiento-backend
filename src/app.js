@@ -9,6 +9,7 @@ import seguidoresRoutes from './routes/seguidores.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import admin from 'firebase-admin';
 import fs from 'fs';
+import notisRoutes from './routes/notis.routes.js';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api', seguimientosRoutes);
 app.use('/api', grupoRoutes);
 app.use('/api', seguidoresRoutes);
 app.use('/api', chatRoutes);
+app.use('/api', notisRoutes);
 
 const serviceAccount = JSON.parse(
     fs.readFileSync('./firebase-credentials.json', 'utf-8')

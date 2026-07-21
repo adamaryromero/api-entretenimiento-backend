@@ -1,5 +1,6 @@
 import { conmysql } from '../db.js'; 
 import jwt from 'jsonwebtoken';
+import { enviarPushAUser } from './controladores/notisctrl.js'; 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'projectEntretenimiento';
 
@@ -123,12 +124,29 @@ export const obtenerContenidosGrupo = async (req, res) => {
 
 export const agregarContenidoGrupo = async (req, res) => {
     try {
+        const usuarioId = obtenerUsuarioId(req);
         const { grupoId, contenidoId } = req.body;
 
         await conmysql.query(
             'INSERT INTO grupo_contenidos (grupo_id, contenido_id) VALUES (?, ?)',
             [grupoId, contenidoId]
         );
+
+        const [obra] = await conmysql.query('SELECT titulo FROM contenidos WHERE id = ?', [contenidoId]);
+        const tituloObra = obra.length > 0 ? obra[0].titulo : 'una nueva obra';
+
+        const [miembros] = await conmysql.query(
+            'SELECT usuario_id FROM grupo_miembros WHERE grupo_id = ? AND usuario_id != ?',
+            [grupoId, usuarioId]
+        );
+
+        for (const miembro of miembros) {
+            await enviarPushAUser(
+                miembro.usuario_id,
+                "MediaTracker 🎬",
+                `Han agregado "${tituloObra}" a la lista compartida del grupo.`
+            );
+        }
 
         res.status(201).json({ message: "Obra agregada a la lista compartida del grupo" });
     } catch (error) {
@@ -251,6 +269,15 @@ export const enviarSolicitud = async (req, res) => {
         await conmysql.query(
             'INSERT INTO grupo_solicitudes (grupo_id, usuario_id_receptor, estado) VALUES (?, ?, ?)',
             [grupoId, receptorId, 'pendiente']
+        );
+
+        const [grupo] = await conmysql.query('SELECT nombre FROM grupos WHERE id = ?', [grupoId]);
+        const nombreGrupo = grupo.length > 0 ? grupo[0].nombre : 'un grupo';
+
+        await enviarPushAUser(
+            receptorId,
+            "Nueva Invitación 👥",
+            `Te han invitado a unirte al grupo "${nombreGrupo}". Revisa tus pendientes.`
         );
 
         res.json({ message: "Solicitud enviada. Pendiente de aceptación." });
