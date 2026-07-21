@@ -234,6 +234,8 @@ export const recuperarPassword = async (req, res) => {
         });
 
         if (!respuesta.ok) {
+            const errorDetalle = await respuesta.text();
+            console.error("Respuesta fallida de Brevo:", errorDetalle);
             throw new Error('Error al enviar el correo mediante Brevo');
         }
 
@@ -257,11 +259,17 @@ export const cambiarPassword = async (req, res) => {
 
         const [user] = await conmysql.query('SELECT password FROM usuarios WHERE id = ?', [userId]);
 
-        if (user[0].password !== passwordActual) {
+        if (user.length === 0) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        const passwordCorrecta = await bcrypt.compare(passwordActual, user[0].password);
+        if (!passwordCorrecta) {
             return res.status(400).json({ message: "La contraseña actual es incorrecta" });
         }
 
-        await conmysql.query('UPDATE usuarios SET password = ? WHERE id = ?', [nuevaPassword, userId]);
+        const passwordHasheada = await bcrypt.hash(nuevaPassword, 10);
+        await conmysql.query('UPDATE usuarios SET password = ? WHERE id = ?', [passwordHasheada, userId]);
 
         res.json({ message: "Tu contraseña ha sido actualizada con éxito 🔒" });
 
