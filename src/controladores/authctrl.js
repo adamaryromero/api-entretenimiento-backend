@@ -206,10 +206,13 @@ export const recuperarPassword = async (req, res) => {
 
         const nuevaPassword = Math.random().toString(36).slice(-8);
 
-        await conmysql.query('UPDATE usuarios SET password = ? WHERE correo = ?', [nuevaPassword, correo]);
+        const passwordHasheada = await bcrypt.hash(nuevaPassword, 10);
+        await conmysql.query('UPDATE usuarios SET password = ? WHERE correo = ?', [passwordHasheada, correo]);
 
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false, 
             auth: {
                 user: 'soporte.mediatracker@gmail.com', 
                 pass: 'wwblofbaryrhkpdq' 
