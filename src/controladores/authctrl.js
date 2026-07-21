@@ -212,17 +212,32 @@ export const recuperarPassword = async (req, res) => {
         const passwordHasheada = await bcrypt.hash(nuevaPassword, 10);
         await conmysql.query('UPDATE usuarios SET password = ? WHERE correo = ?', [passwordHasheada, correo]);
 
-        await resend.emails.send({
-            from: 'MediaTracker <onboarding@resend.dev>',
-            to: [correo],
-            subject: 'Recuperación de Acceso - MediaTracker',
-            html: `
-                <h2>Recuperación de contraseña</h2>
-                <p>Hola ${user[0].nombre},</p>
-                <p>Tu nueva contraseña temporal es: <b>${nuevaPassword}</b></p>
-                <p>Por favor, inicia sesión con esta clave y cámbiala en la sección de "Perfil".</p>
-            `
+        const respuesta = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { 
+                    name: 'MediaTracker', 
+                    email: process.env.BREVO_SENDER_EMAIL 
+                },
+                to: [{ email: correo }],
+                subject: 'Recuperación de Acceso - MediaTracker',
+                htmlContent: `
+                    <h2>Recuperación de contraseña</h2>
+                    <p>Hola ${user[0].nombre},</p>
+                    <p>Tu nueva contraseña temporal es: <b>${nuevaPassword}</b></p>
+                    <p>Por favor, inicia sesión con esta clave y cámbiala en la sección de "Perfil".</p>
+                `
+            })
         });
+
+        if (!respuesta.ok) {
+            throw new Error('Error al enviar el correo mediante Brevo');
+        }
 
         res.json({ message: "Te hemos enviado un correo con tu nueva contraseña temporal." });
 
