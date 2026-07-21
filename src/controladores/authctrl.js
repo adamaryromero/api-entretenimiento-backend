@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 
 export const login = async (req, res) => {
     try {
-        const { correo, password } = req.body;
+        const { correo, password, fcm_token } = req.body;
 
         if (!correo || !password) {
             return res.status(400).json({ message: "Por favor, envía correo y contraseña" });
@@ -27,6 +27,13 @@ export const login = async (req, res) => {
 
         if (!passwordCorrecta) {
             return res.status(401).json({ message: "Credenciales incorrectas" });
+        }
+
+        if (fcm_token) {
+            await conmysql.query(
+                'UPDATE usuarios SET fcm_token = ? WHERE id = ?',
+                [fcm_token, usuario.id]
+            );
         }
 
         const token = jwt.sign(
