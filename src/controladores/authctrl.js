@@ -5,8 +5,6 @@ import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export const login = async (req, res) => {
     try {
         const { correo, password, fcm_token } = req.body;
