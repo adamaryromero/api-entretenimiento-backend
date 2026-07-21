@@ -1,4 +1,5 @@
 import { conmysql } from '../db.js';
+import { notificarNuevoContenidoATodos } from './notisctrl.js';
 
 export const getContenidos = async (req, res) => {
     try {
@@ -131,6 +132,8 @@ export const crearContenido = async (req, res) => {
                 [totalCapitulos, nuevoContenidoId]
             );
         }
+
+        notificarNuevoContenidoATodos(titulo);
 
         res.status(201).json({ message: "¡Obra creada exitosamente con sus temporadas!" });
     } catch (error) {

@@ -54,3 +54,25 @@ export const enviarNotificacionApi = async (req, res) => {
         res.status(500).json({ message: "Error en el servidor al procesar la notificación" });
     }
 };
+
+export const notificarNuevoContenidoATodos = async (tituloObra) => {
+    try {
+        const [usuarios] = await conmysql.query(
+            'SELECT id FROM usuarios WHERE fcm_token IS NOT NULL'
+        );
+
+        if (usuarios.length === 0) return;
+
+        for (const usuario of usuarios) {
+            await enviarPushAUser(
+                usuario.id,
+                "¡Nuevo Contenido Agregado! 🎬",
+                `Se ha añadido "${tituloObra}" al catálogo general. ¡Ven a descubrirlo!`
+            );
+        }
+
+        console.log("Notificación masiva de nuevo contenido enviada a todos los usuarios.");
+    } catch (error) {
+        console.error("Error al enviar notificaciones masivas:", error);
+    }
+};
