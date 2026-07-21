@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config.js';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const login = async (req, res) => {
     try {
@@ -209,19 +212,9 @@ export const recuperarPassword = async (req, res) => {
         const passwordHasheada = await bcrypt.hash(nuevaPassword, 10);
         await conmysql.query('UPDATE usuarios SET password = ? WHERE correo = ?', [passwordHasheada, correo]);
 
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false, 
-            auth: {
-                user: 'soporte.mediatracker@gmail.com', 
-                pass: 'wwblofbaryrhkpdq' 
-            }
-        });
-
-        await transporter.sendMail({
-            from: 'soporte.mediatracker@gmail.com',
-            to: correo,
+        await resend.emails.send({
+            from: 'MediaTracker <onboarding@resend.dev>',
+            to: [correo],
             subject: 'Recuperación de Acceso - MediaTracker',
             html: `
                 <h2>Recuperación de contraseña</h2>
