@@ -37,7 +37,7 @@ export const login = async (req, res) => {
                 rol: usuario.rol 
             }, 
             JWT_SECRET, 
-            { expiresIn: '3h' } 
+            { expiresIn: '365d' } 
         );
 
         res.json({
